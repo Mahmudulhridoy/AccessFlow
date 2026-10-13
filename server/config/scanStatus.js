@@ -1,0 +1,14 @@
+export const ACTIVE_STATUSES = [
+  "QUEUED",
+  "VALIDATING",
+  "RENDERING",
+  "ANALYZING",
+  "CLASSIFYING",
+  "EXPLAINING",
+];
+
+export const FINISHED_STATUSES = [
+  "COMPLETED",
+  "COMPLETED_WITH_WARNINGS",
+  "FAILED",
+];
