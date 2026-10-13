@@ -6,6 +6,8 @@ import Register from "./components/Register";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import Dashboard from "./components/Dashboard";
+import ProjectForm from "./components/ProjectForm";
+import ProjectDetail from "./components/ProjectDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function Landing() {
@@ -25,6 +27,9 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/dashboard" element={userOnly(<Dashboard />)} />
+      <Route path="/projects/new" element={userOnly(<ProjectForm />)} />
+      <Route path="/projects/:id" element={userOnly(<ProjectDetail />)} />
+      <Route path="/projects/:id/edit" element={userOnly(<ProjectForm />)} />
       <Route
         path="/admin/scans"
         element={
