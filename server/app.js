@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import env from "./config/env.js";
+import authRoutes from "./routes/auth.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
@@ -19,6 +20,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+app.use("/api/auth", authRoutes);
 
 app.use(errorHandler);
 
