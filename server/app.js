@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes.js";
 import passwordResetRoutes from "./routes/passwordReset.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import scanRoutes from "./routes/scan.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/auth", passwordResetRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api", scanRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use(errorHandler);
 

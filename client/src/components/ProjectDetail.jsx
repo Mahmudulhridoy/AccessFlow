@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { alertBox, btnDanger, btnLight, card } from "../utils/ui";
 import AppLayout from "./AppLayout";
+import ScanPanel from "./ScanPanel";
 import StartScan from "./StartScan";
 
 export default function ProjectDetail() {
@@ -100,6 +101,10 @@ export default function ProjectDetail() {
       </section>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[2fr_1fr]">
+        <section className={card}>
+          <h2 className="text-base font-bold">Scan history</h2>
+          <ScanPanel projectId={project.id} refreshKey={scanRefresh} />
+        </section>
         <section className={`${card} self-start`}>
           <h2 className="text-base font-bold">Scan this page</h2>
           <p className="mt-2 text-muted">
