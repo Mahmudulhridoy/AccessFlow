@@ -8,6 +8,7 @@ import ResetPassword from "./components/ResetPassword";
 import Dashboard from "./components/Dashboard";
 import ProjectForm from "./components/ProjectForm";
 import ProjectDetail from "./components/ProjectDetail";
+import AdminScans from "./components/AdminScans";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function Landing() {
@@ -34,7 +35,7 @@ export default function App() {
         path="/admin/scans"
         element={
           <ProtectedRoute role="ADMIN">
-            <Dashboard />
+            <AdminScans />
           </ProtectedRoute>
         }
       />
