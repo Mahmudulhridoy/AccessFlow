@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { alertBox, btnDanger, btnLight, card } from "../utils/ui";
 import AppLayout from "./AppLayout";
+import StartScan from "./StartScan";
 
 export default function ProjectDetail() {
   const { id } = useParams();
@@ -10,6 +11,7 @@ export default function ProjectDetail() {
   const [project, setProject] = useState(null);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [scanRefresh, setScanRefresh] = useState(0);
 
   useEffect(() => {
     api
@@ -96,6 +98,19 @@ export default function ProjectDetail() {
           </div>
         </div>
       </section>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-[2fr_1fr]">
+        <section className={`${card} self-start`}>
+          <h2 className="text-base font-bold">Scan this page</h2>
+          <p className="mt-2 text-muted">
+            Scans one public page against a selected set of accessibility rules.
+          </p>
+          <StartScan
+            projectId={project.id}
+            onStarted={() => setScanRefresh((n) => n + 1)}
+          />
+        </section>
+      </div>
     </AppLayout>
   );
 }
