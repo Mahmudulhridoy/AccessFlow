@@ -4,6 +4,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import env from "./config/env.js";
 import authRoutes from "./routes/auth.routes.js";
+import passwordResetRoutes from "./routes/passwordReset.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
@@ -21,6 +22,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", passwordResetRoutes);
 
 app.use(errorHandler);
 

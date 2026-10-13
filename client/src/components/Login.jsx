@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { homeFor } from "../utils/home";
 import { alertBox, btnDark, input, label } from "../utils/ui";
@@ -9,6 +9,7 @@ import Icon from "./Icon";
 export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
+  const notice = useLocation().state?.notice;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
@@ -44,10 +45,12 @@ export default function Login() {
       }
     >
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        {notice && (
           <p
             role="status"
             className="rounded-[10px] bg-green-100 p-3 text-sm text-green-900"
           >
+            {notice}
           </p>
         )}
         {error && (
@@ -95,6 +98,7 @@ export default function Login() {
             </button>
           </div>
           <Link
+            to="/forgot-password"
             className="mt-1 inline-flex min-h-11 items-center text-[13px] font-semibold text-ink underline"
           >
             Forgot password?
