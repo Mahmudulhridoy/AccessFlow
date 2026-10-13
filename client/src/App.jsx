@@ -3,6 +3,8 @@ import { useAuth } from "./context/AuthContext";
 import { homeFor } from "./utils/home";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 import Dashboard from "./components/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -20,6 +22,8 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/dashboard" element={userOnly(<Dashboard />)} />
       <Route
         path="/admin/scans"
