@@ -117,6 +117,11 @@ enum PrioritySource {
   FALLBACK_AXE_IMPACT
 }
 
+enum ExplanationSource {
+  LLM
+  AXE_FALLBACK
+}
+
 enum DatasetOrigin {
   REAL_ANNOTATED
   SYNTHETIC_FIXTURE
@@ -140,6 +145,7 @@ model Finding {
   nodes       FindingNode[]
   wcag        FindingWcag[]
   prediction  MlPrediction?
+  explanation AiExplanation?
 
   @@unique([scanId, dedupeKey])
   @@index([scanId])
@@ -195,6 +201,21 @@ model MlPrediction {
   finding       Finding        @relation(fields: [findingId], references: [id], onDelete: Cascade)
 
   @@index([priority])
+}
+
+model AiExplanation {
+  id          Int               @id @default(autoincrement())
+  findingId   Int               @unique
+  source      ExplanationSource
+  explanation String            @db.Text
+  userImpact  String?           @db.Text
+  suggestedFix String?          @db.Text
+  exampleCode String?           @db.Text
+  provider    String?           @db.VarChar(40)
+  model       String?           @db.VarChar(80)
+  createdAt   DateTime          @default(now())
+
+  finding     Finding           @relation(fields: [findingId], references: [id], onDelete: Cascade)
 }
 
 // Imported from model_metadata.json by a script; the Admin page only reads these rows.
