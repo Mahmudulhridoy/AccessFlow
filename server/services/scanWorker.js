@@ -7,6 +7,7 @@ import { ScanError, friendlyMessage } from '../config/scanErrors.js';
 import * as Scan from '../models/scan.model.js';
 import * as Finding from '../models/finding.model.js';
 import { runAxe } from './axeRunner.js';
+import { runClassification } from './classificationStep.js';
 import { assertSafeUrl, assertPublicHost } from './ssrf.js';
 import { SCREENSHOT_DIR } from '../config/paths.js';
 
@@ -153,6 +154,11 @@ async function runScan(scanId) {
     lap('analyzing');
 
     const allWarnings = [...analysis.warnings];
+    if (saved.length) {
+      await Scan.setStatus(scanId, 'CLASSIFYING');
+      allWarnings.push(...(await runClassification(saved, analysis.findings)));
+      lap('classifying');
+    }
 
     const warnings = allWarnings.length ? allWarnings : null;
     await Scan.finish(scanId, {
