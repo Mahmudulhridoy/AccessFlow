@@ -1,4 +1,4 @@
-import * as Project from "../models/project.model.js";
+import * as Project from '../models/project.model.js';
 
 const MAX_PROJECTS = 10;
 
@@ -12,7 +12,7 @@ async function getOwned(req, res) {
   const id = parseId(req.params.id);
   const project = id ? await Project.findOwned(req.user.id, id) : null;
   if (!project) {
-    res.status(404).json({ error: "Project not found" });
+    res.status(404).json({ error: 'Project not found' });
     return null;
   }
   return project;
@@ -25,9 +25,7 @@ export async function list(req, res) {
 
 export async function create(req, res) {
   if ((await Project.countByUser(req.user.id)) >= MAX_PROJECTS) {
-    return res
-      .status(409)
-      .json({ error: `You can have up to ${MAX_PROJECTS} projects` });
+    return res.status(409).json({ error: `You can have up to ${MAX_PROJECTS} projects` });
   }
   const { name, url } = req.body;
   const project = await Project.create(req.user.id, name, url);
@@ -53,8 +51,7 @@ export async function remove(req, res) {
 
   if (await Project.hasActiveScan(project.id)) {
     return res.status(409).json({
-      error:
-        "A scan is still running for this project. Wait for it to finish before deleting.",
+      error: 'A scan is still running for this project. Wait for it to finish before deleting.',
     });
   }
 

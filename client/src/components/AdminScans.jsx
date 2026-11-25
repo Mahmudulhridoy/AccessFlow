@@ -1,104 +1,55 @@
-import { useEffect, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import api from "../api/axios";
-import {
-  ACTIVE_STATUSES,
-  ERROR_CODES,
-  STATUS_LABELS,
-  statusBadge,
-} from "../utils/scanStatus";
-import { alertBox, card, input, label } from "../utils/ui";
-import AppLayout from "./AppLayout";
-import StatCard from "./StatCard";
+import { useEffect, useState } from 'react';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import api from '../api/axios';
+import { ACTIVE_STATUSES, ERROR_CODES, STATUS_LABELS, statusBadge } from '../utils/scanStatus';
+import { alertBox, card, input, label } from '../utils/ui';
+import AppLayout from './AppLayout';
+import StatCard from './StatCard';
 
 export default function AdminScans() {
   const [summary, setSummary] = useState(null);
   const [data, setData] = useState(null);
-  const [status, setStatus] = useState("");
-  const [errorCode, setErrorCode] = useState("");
+  const [status, setStatus] = useState('');
+  const [errorCode, setErrorCode] = useState('');
   const [page, setPage] = useState(1);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
     api
-      .get("/admin/scans/summary")
+      .get('/admin/scans/summary')
       .then((res) => setSummary(res.data))
-      .catch(() => setError("Could not load the summary"));
+      .catch(() => setError('Could not load the summary'));
   }, []);
 
   useEffect(() => {
     api
-      .get("/admin/scans", {
-        params: {
-          status: status || undefined,
-          errorCode: errorCode || undefined,
-          page,
-        },
+      .get('/admin/scans', {
+        params: { status: status || undefined, errorCode: errorCode || undefined, page },
       })
       .then((res) => {
         setData(res.data);
-        setError("");
+        setError('');
       })
-      .catch(() => setError("Could not load scans"));
+      .catch(() => setError('Could not load scans'));
   }, [status, errorCode, page]);
 
   const count = (list) =>
-    summary
-      ? summary.byStatus
-          .filter((r) => list.includes(r.status))
-          .reduce((s, r) => s + r.count, 0)
-      : "-";
+    summary ? summary.byStatus.filter((r) => list.includes(r.status)).reduce((s, r) => s + r.count, 0) : '-';
 
-  const totalPages = data
-    ? Math.max(1, Math.ceil(data.total / data.pageSize))
-    : 1;
-  const chartData = summary
-    ? summary.byErrorCode.map((r) => ({ name: r.errorCode, count: r.count }))
-    : [];
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
+  const chartData = summary ? summary.byErrorCode.map((r) => ({ name: r.errorCode, count: r.count })) : [];
 
   return (
     <AppLayout title="Platform overview">
       <h1 className="text-[22px] font-bold">Scan monitoring</h1>
 
-      {error && (
-        <p role="alert" className={`${alertBox} mt-4`}>
-          {error}
-        </p>
-      )}
+      {error && <p role="alert" className={`${alertBox} mt-4`}>{error}</p>}
 
       <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon="globe"
-          label="Total Scans"
-          value={summary ? summary.total : "-"}
-          note="All users"
-        />
-        <StatCard
-          icon="check"
-          label="Completed"
-          value={count(["COMPLETED", "COMPLETED_WITH_WARNINGS"])}
-          note="Including warnings"
-        />
-        <StatCard
-          icon="xc"
-          label="Failed Scans"
-          value={count(["FAILED"])}
-          note="See errors below"
-        />
-        <StatCard
-          icon="clock"
-          label="In Progress"
-          value={count(ACTIVE_STATUSES)}
-          note="Queued or running"
-        />
+        <StatCard icon="globe" label="Total Scans" value={summary ? summary.total : '-'} note="All users" />
+        <StatCard icon="check" label="Completed" value={count(['COMPLETED', 'COMPLETED_WITH_WARNINGS'])} note="Including warnings" />
+        <StatCard icon="xc" label="Failed Scans" value={count(['FAILED'])} note="See errors below" />
+        <StatCard icon="clock" label="In Progress" value={count(ACTIVE_STATUSES)} note="Queued or running" />
       </div>
 
       <section className={`${card} mt-5`}>
@@ -109,10 +60,7 @@ export default function AdminScans() {
           <>
             <div className="mt-3 h-64 w-full">
               <ResponsiveContainer>
-                <BarChart
-                  data={chartData}
-                  margin={{ top: 8, right: 8, bottom: 8, left: 0 }}
-                >
+                <BarChart data={chartData} margin={{ top: 8, right: 8, bottom: 8, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e8eaf2" />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} />
@@ -122,7 +70,7 @@ export default function AdminScans() {
               </ResponsiveContainer>
             </div>
             <p className="mt-2 text-[13px] text-muted">
-              {chartData.map((d) => `${d.name}: ${d.count}`).join(", ")}
+              {chartData.map((d) => `${d.name}: ${d.count}`).join(', ')}
             </p>
           </>
         )}
@@ -133,9 +81,7 @@ export default function AdminScans() {
 
         <div className="mt-3 flex flex-wrap gap-4">
           <div>
-            <label htmlFor="status" className={label}>
-              Status
-            </label>
+            <label htmlFor="status" className={label}>Status</label>
             <select
               id="status"
               value={status}
@@ -147,16 +93,12 @@ export default function AdminScans() {
             >
               <option value="">All</option>
               {Object.entries(STATUS_LABELS).map(([value, text]) => (
-                <option key={value} value={value}>
-                  {text}
-                </option>
+                <option key={value} value={value}>{text}</option>
               ))}
             </select>
           </div>
           <div>
-            <label htmlFor="errorCode" className={label}>
-              Error code
-            </label>
+            <label htmlFor="errorCode" className={label}>Error code</label>
             <select
               id="errorCode"
               value={errorCode}
@@ -168,9 +110,7 @@ export default function AdminScans() {
             >
               <option value="">All</option>
               {ERROR_CODES.map((code) => (
-                <option key={code} value={code}>
-                  {code}
-                </option>
+                <option key={code} value={code}>{code}</option>
               ))}
             </select>
           </div>
@@ -186,18 +126,8 @@ export default function AdminScans() {
               <caption className="sr-only">Scans across all users</caption>
               <thead>
                 <tr className="bg-page text-[#434769]">
-                  {[
-                    "Scan",
-                    "Project",
-                    "Owner",
-                    "URL",
-                    "Status",
-                    "Error",
-                    "Started",
-                  ].map((h) => (
-                    <th key={h} scope="col" className="p-3 font-semibold">
-                      {h}
-                    </th>
+                  {['Scan', 'Project', 'Owner', 'URL', 'Status', 'Error', 'Started'].map((h) => (
+                    <th key={h} scope="col" className="p-3 font-semibold">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -209,16 +139,12 @@ export default function AdminScans() {
                     <td className="p-3">{s.project.user.email}</td>
                     <td className="max-w-xs break-all p-3">{s.scannedUrl}</td>
                     <td className="p-3">
-                      <span
-                        className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusBadge(s.status)}`}
-                      >
+                      <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusBadge(s.status)}`}>
                         {STATUS_LABELS[s.status]}
                       </span>
                     </td>
-                    <td className="p-3">{s.errorCode || "-"}</td>
-                    <td className="whitespace-nowrap p-3">
-                      {new Date(s.createdAt).toLocaleString()}
-                    </td>
+                    <td className="p-3">{s.errorCode || '-'}</td>
+                    <td className="whitespace-nowrap p-3">{new Date(s.createdAt).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -235,9 +161,7 @@ export default function AdminScans() {
             >
               Previous
             </button>
-            <span>
-              Page {page} of {totalPages}
-            </span>
+            <span>Page {page} of {totalPages}</span>
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={page >= totalPages}

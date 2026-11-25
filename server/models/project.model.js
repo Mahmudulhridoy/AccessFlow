@@ -1,17 +1,12 @@
-import prisma from "../config/db.js";
-import { FINISHED_STATUSES } from "../config/scanStatus.js";
+import prisma from '../config/db.js';
+import { FINISHED_STATUSES } from '../config/scanStatus.js';
 
 export const listByUser = (userId) =>
-  prisma.project.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-  });
+  prisma.project.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } });
 
-export const countByUser = (userId) =>
-  prisma.project.count({ where: { userId } });
+export const countByUser = (userId) => prisma.project.count({ where: { userId } });
 
-export const findOwned = (userId, id) =>
-  prisma.project.findFirst({ where: { id, userId } });
+export const findOwned = (userId, id) => prisma.project.findFirst({ where: { id, userId } });
 
 export const create = (userId, name, url) =>
   prisma.project.create({ data: { userId, name, url } });

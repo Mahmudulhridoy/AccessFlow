@@ -1,15 +1,12 @@
-import prisma from "../config/db.js";
+import prisma from '../config/db.js';
 
 export const create = (userId, tokenHash, expiresAt) =>
   prisma.passwordReset.create({ data: { userId, tokenHash, expiresAt } });
 
-export const findByHash = (tokenHash) =>
-  prisma.passwordReset.findUnique({ where: { tokenHash } });
+export const findByHash = (tokenHash) => prisma.passwordReset.findUnique({ where: { tokenHash } });
 
 export const recentFor = (userId, since) =>
-  prisma.passwordReset.findFirst({
-    where: { userId, createdAt: { gte: since } },
-  });
+  prisma.passwordReset.findFirst({ where: { userId, createdAt: { gte: since } } });
 
 export const invalidateOpen = (userId) =>
   prisma.passwordReset.updateMany({

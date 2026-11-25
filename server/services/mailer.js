@@ -1,5 +1,5 @@
-import nodemailer from "nodemailer";
-import env from "../config/env.js";
+import nodemailer from 'nodemailer';
+import env from '../config/env.js';
 
 let transport;
 
@@ -13,7 +13,7 @@ const getTransport = () =>
 
 export async function sendResetEmail(to, link) {
   if (!env.smtpHost) {
-    if (env.isProd) throw new Error("SMTP is not configured");
+    if (env.isProd) throw new Error('SMTP is not configured');
     // Local development: no mail server needed, the link is printed in the server terminal
     console.log(`\nPassword reset link for ${to}:\n${link}\n`);
     return;
@@ -22,14 +22,14 @@ export async function sendResetEmail(to, link) {
   await getTransport().sendMail({
     from: env.mailFrom,
     to,
-    subject: "Reset your AccessFlow password",
+    subject: 'Reset your AccessFlow password',
     text: [
-      "We received a request to reset your AccessFlow password.",
-      "",
-      "Open this link within 30 minutes to choose a new password:",
+      'We received a request to reset your AccessFlow password.',
+      '',
+      'Open this link within 30 minutes to choose a new password:',
       link,
-      "",
+      '',
       "If you didn't ask for this, you can ignore this email. Your password will not change.",
-    ].join("\n"),
+    ].join('\n'),
   });
 }

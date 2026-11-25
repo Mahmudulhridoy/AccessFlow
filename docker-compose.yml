@@ -1,14 +1,16 @@
+name: accessflow-v2
+
 services:
   db:
     image: mysql:8
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: accessflow
+      MYSQL_DATABASE: accessflow_v2
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
-      - dbdata:/var/lib/mysql
+      - accessflow_v2_data:/var/lib/mysql
 
 volumes:
-  dbdata:
+  accessflow_v2_data:
