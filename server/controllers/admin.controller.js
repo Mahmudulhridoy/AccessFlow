@@ -1,6 +1,8 @@
-import * as Scan from "../models/scan.model.js";
-import { ACTIVE_STATUSES, FINISHED_STATUSES } from "../config/scanStatus.js";
-import { ERROR_CODES } from "../config/scanErrors.js";
+import * as Scan from '../models/scan.model.js';
+import * as MlEvaluation from '../models/mlEvaluation.model.js';
+import { presentEvaluation } from '../services/mlEvaluation.js';
+import { ACTIVE_STATUSES, FINISHED_STATUSES } from '../config/scanStatus.js';
+import { ERROR_CODES } from '../config/scanErrors.js';
 
 const PAGE_SIZE = 20;
 const ALL_STATUSES = [...ACTIVE_STATUSES, ...FINISHED_STATUSES];
@@ -10,21 +12,16 @@ export async function listScans(req, res) {
   const page = Number(req.query.page ?? 1);
 
   if (status && !ALL_STATUSES.includes(status)) {
-    return res.status(400).json({ error: "Unknown status filter" });
+    return res.status(400).json({ error: 'Unknown status filter' });
   }
   if (errorCode && !ERROR_CODES.includes(errorCode)) {
-    return res.status(400).json({ error: "Unknown error code filter" });
+    return res.status(400).json({ error: 'Unknown error code filter' });
   }
   if (!Number.isInteger(page) || page < 1) {
-    return res.status(400).json({ error: "Invalid page number" });
+    return res.status(400).json({ error: 'Invalid page number' });
   }
 
-  const { total, scans } = await Scan.adminList({
-    status,
-    errorCode,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+  const { total, scans } = await Scan.adminList({ status, errorCode, page, pageSize: PAGE_SIZE });
   res.json({ scans, total, page, pageSize: PAGE_SIZE });
 }
 
@@ -36,13 +33,13 @@ export async function summary(req, res) {
 
   res.json({
     total: byStatus.reduce((sum, row) => sum + row._count._all, 0),
-    byStatus: byStatus.map((row) => ({
-      status: row.status,
-      count: row._count._all,
-    })),
-    byErrorCode: byErrorCode.map((row) => ({
-      errorCode: row.errorCode,
-      count: row._count._all,
-    })),
+    byStatus: byStatus.map((row) => ({ status: row.status, count: row._count._all })),
+    byErrorCode: byErrorCode.map((row) => ({ errorCode: row.errorCode, count: row._count._all })),
   });
+}
+
+// Read-only: lists saved evaluation records exactly as imported from the training pipeline.
+export async function mlEvaluations(req, res) {
+  const rows = await MlEvaluation.list();
+  res.json({ evaluations: rows.map(presentEvaluation) });
 }
