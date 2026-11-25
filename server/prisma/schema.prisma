@@ -76,14 +76,89 @@ model Scan {
   projectId      Int
   scannedUrl     String     @db.VarChar(2048)
   finalUrl       String?    @db.VarChar(2048)
+  result         Json?
+  screenshotFile String?    @db.VarChar(100)
   status         ScanStatus @default(QUEUED)
   errorCode      String?    @db.VarChar(40)
   errorMessage   String?    @db.VarChar(500)
   stageDurations Json?
+  axeVersion     String?    @db.VarChar(20)
+  rulesetId      String?    @db.VarChar(40)
+  warnings       Json?
   createdAt      DateTime   @default(now())
   completedAt    DateTime?
   project        Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  findings       Finding[]
 
   @@index([projectId, createdAt])
   @@index([status])
 }
+
+// ---------------------------------------------------------------------------
+// Module 2: accessibility findings, ML priority, AI explanations, ML evaluation
+// Ownership is never stored here: access always goes Finding -> Scan -> Project -> userId.
+// ---------------------------------------------------------------------------
+
+enum AxeImpact {
+  MINOR
+  MODERATE
+  SERIOUS
+  CRITICAL
+}
+
+// One axe-core rule that failed on one scanned page (nodes are aggregated below).
+model Finding {
+  id          Int       @id @default(autoincrement())
+  scanId      Int
+  ruleId      String    @db.VarChar(100)
+  axeImpact   AxeImpact? // scanner impact, kept separate from ML priority
+  description String    @db.Text
+  help        String?   @db.VarChar(500)
+  helpUrl     String?   @db.VarChar(2048)
+  tags        Json      // raw axe tags, e.g. ["wcag2aa","wcag143","cat.color"]
+  nodeCount   Int       // true number of affected nodes (nodes below may be capped)
+  dedupeKey   String    @db.VarChar(64) // hash of ruleId + normalised selectors
+  createdAt   DateTime  @default(now())
+
+  scan        Scan           @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  nodes       FindingNode[]
+  wcag        FindingWcag[]
+
+  @@unique([scanId, dedupeKey])
+  @@index([scanId])
+  @@index([ruleId])
+}
+
+model FindingNode {
+  id             Int     @id @default(autoincrement())
+  findingId      Int
+  ordinal        Int
+  selector       String  @db.Text          // CSS selector (shadow/iframe path joined with " >> ")
+  htmlSnippet    String  @db.VarChar(500)  // truncated evidence, never the full page
+  tag            String? @db.VarChar(30)
+  role           String? @db.VarChar(40)
+  isInteractive  Boolean @default(false)
+  landmark       String? @db.VarChar(30)   // nearest landmark ancestor, null if none
+  failureSummary String? @db.VarChar(1000)
+  // Where the element sits on the full-page screenshot, in CSS pixels: { x, y, w, h }. Null for old scans, elements inside
+  // iframes, and elements that are hidden. Used to draw numbered markers on the annotated screenshot.
+  bbox           Json?
+
+  finding        Finding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+
+  @@index([findingId])
+}
+
+// Structured WCAG criteria so Module 3 can filter by criterion/level with an index.
+model FindingWcag {
+  id        Int     @id @default(autoincrement())
+  findingId Int
+  criterion String  @db.VarChar(10)  // "1.4.3"
+  level     String? @db.VarChar(3)   // "A" | "AA" | "AAA"
+
+  finding   Finding @relation(fields: [findingId], references: [id], onDelete: Cascade)
+
+  @@unique([findingId, criterion])
+  @@index([criterion])
+}
+
