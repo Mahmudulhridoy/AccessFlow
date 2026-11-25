@@ -106,6 +106,17 @@ enum AxeImpact {
   CRITICAL
 }
 
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum PrioritySource {
+  ML
+  FALLBACK_AXE_IMPACT
+}
+
 // One axe-core rule that failed on one scanned page (nodes are aggregated below).
 model Finding {
   id          Int       @id @default(autoincrement())
@@ -123,6 +134,7 @@ model Finding {
   scan        Scan           @relation(fields: [scanId], references: [id], onDelete: Cascade)
   nodes       FindingNode[]
   wcag        FindingWcag[]
+  prediction  MlPrediction?
 
   @@unique([scanId, dedupeKey])
   @@index([scanId])
@@ -160,5 +172,23 @@ model FindingWcag {
 
   @@unique([findingId, criterion])
   @@index([criterion])
+}
+
+// Either a real ML prediction or a clearly marked fallback, never a mix of the two.
+model MlPrediction {
+  id            Int            @id @default(autoincrement())
+  findingId     Int            @unique
+  priority      Priority
+  source        PrioritySource
+  modelName     String?        @db.VarChar(80)
+  modelVersion  String?        @db.VarChar(40)
+  probabilities Json?
+  features      Json?          // exact feature vector sent, for audit/reproducibility
+  failureReason String?        @db.VarChar(200) // why fallback was used
+  createdAt     DateTime       @default(now())
+
+  finding       Finding        @relation(fields: [findingId], references: [id], onDelete: Cascade)
+
+  @@index([priority])
 }
 
