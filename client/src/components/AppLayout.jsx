@@ -18,6 +18,7 @@ const NAV = {
       items: [
         { to: '/admin/scans', label: 'All Scans', icon: 'globe' },
         { to: '/admin/ml', label: 'ML Evaluation', icon: 'check' },
+        { to: '/admin/ai-quality', label: 'AI Quality', icon: 'eye' },
       ],
     },
   ],

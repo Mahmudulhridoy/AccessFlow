@@ -8,8 +8,10 @@ import ResetPassword from './components/ResetPassword';
 import Dashboard from './components/Dashboard';
 import ProjectForm from './components/ProjectForm';
 import ProjectDetail from './components/ProjectDetail';
+import ScanReport from './components/ScanReport';
 import ComparePage from './components/ComparePage';
 import AdminScans from './components/AdminScans';
+import AdminAiQuality from './components/AdminAiQuality';
 import AdminMlEvaluation from './components/AdminMlEvaluation';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -33,6 +35,7 @@ export default function App() {
       <Route path="/projects/new" element={userOnly(<ProjectForm />)} />
       <Route path="/projects/:id" element={userOnly(<ProjectDetail />)} />
       <Route path="/projects/:id/edit" element={userOnly(<ProjectForm />)} />
+      <Route path="/scans/:id" element={userOnly(<ScanReport />)} />
       <Route path="/scans/:id/compare/:otherId" element={userOnly(<ComparePage />)} />
       <Route
         path="/admin/scans"
@@ -47,6 +50,14 @@ export default function App() {
         element={
           <ProtectedRoute role="ADMIN">
             <AdminMlEvaluation />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/ai-quality"
+        element={
+          <ProtectedRoute role="ADMIN">
+            <AdminAiQuality />
           </ProtectedRoute>
         }
       />
