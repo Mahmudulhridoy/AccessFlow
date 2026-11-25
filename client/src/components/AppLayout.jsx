@@ -1,27 +1,24 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import Icon from "./Icon";
-import Logo from "./Logo";
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import Icon from './Icon';
+import Logo from './Logo';
 
 const NAV = {
   USER: [
     {
-      section: "Navigation",
-      items: [
-        {
-          to: "/dashboard",
-          also: "/projects",
-          label: "My Projects",
-          icon: "folder",
-        },
-      ],
+      section: 'Navigation',
+      items: [{ to: '/dashboard', also: '/projects', label: 'My Projects', icon: 'folder' }],
     },
   ],
   ADMIN: [
     {
-      section: "Platform",
-      items: [{ to: "/admin/scans", label: "All Scans", icon: "globe" }],
+      section: 'Platform',
+      items: [
+        { to: '/admin/scans', label: 'All Scans', icon: 'globe' },
+        { to: '/admin/ml', label: 'ML Evaluation', icon: 'check' },
+      ],
     },
   ],
 };
@@ -33,7 +30,7 @@ function SidebarContent() {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login");
+    navigate('/login');
   };
 
   return (
@@ -49,18 +46,14 @@ function SidebarContent() {
               {group.section}
             </p>
             {group.items.map((item) => {
-              const active =
-                pathname === item.to ||
-                (item.also && pathname.startsWith(item.also));
+              const active = pathname === item.to || (item.also && pathname.startsWith(item.also));
               return (
                 <Link
                   key={item.to}
                   to={item.to}
-                  aria-current={active ? "page" : undefined}
+                  aria-current={active ? 'page' : undefined}
                   className={`flex min-h-11 items-center gap-3 rounded-lg px-3 ${
-                    active
-                      ? "bg-brand/25 text-white shadow-[inset_3px_0_0_#7b6cf6]"
-                      : "hover:bg-white/5"
+                    active ? 'bg-brand/25 text-white shadow-[inset_3px_0_0_#7b6cf6]' : 'hover:bg-white/5'
                   }`}
                 >
                   <Icon name={item.icon} />
@@ -74,13 +67,8 @@ function SidebarContent() {
 
       <div className="border-t border-white/10 pt-4 text-[13px]">
         <p className="break-all font-semibold text-white">{user.email}</p>
-        <p className="mt-1">
-          {user.role === "ADMIN" ? "Admin account" : "User account"}
-        </p>
-        <button
-          onClick={handleLogout}
-          className="mt-2 flex min-h-11 items-center gap-3 hover:text-white"
-        >
+        <p className="mt-1">{user.role === 'ADMIN' ? 'Admin account' : 'User account'}</p>
+        <button onClick={handleLogout} className="mt-2 flex min-h-11 items-center gap-3 hover:text-white">
           <Icon name="out" />
           Log out
         </button>
@@ -92,6 +80,7 @@ function SidebarContent() {
 export default function AppLayout({ title, children }) {
   const { user } = useAuth();
   const { pathname } = useLocation();
+  const { theme, toggle } = useTheme();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -100,7 +89,7 @@ export default function AppLayout({ title, children }) {
 
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden w-62 shrink-0 bg-navy md:block">
+      <aside data-app-sidebar className="hidden w-62 shrink-0 bg-navy md:block">
         <SidebarContent />
       </aside>
 
@@ -109,16 +98,12 @@ export default function AppLayout({ title, children }) {
           <aside className="w-62 bg-navy">
             <SidebarContent />
           </aside>
-          <button
-            aria-label="Close menu"
-            onClick={() => setOpen(false)}
-            className="flex-1 bg-black/50"
-          />
+          <button aria-label="Close menu" onClick={() => setOpen(false)} className="flex-1 bg-black/50" />
         </div>
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center gap-3 border-b border-line bg-white px-4 md:px-6">
+        <header data-app-header className="flex h-16 items-center gap-3 border-b border-line bg-white px-4 md:px-6">
           <button
             aria-label="Open menu"
             aria-expanded={open}
@@ -128,17 +113,33 @@ export default function AppLayout({ title, children }) {
             <Icon name="menu" />
           </button>
           <p className="text-base font-bold">{title}</p>
+          <button
+            type="button"
+            onClick={toggle}
+            aria-pressed={theme === 'dark'}
+            className="ml-auto grid h-10 w-10 place-items-center rounded-full border border-line text-ink hover:bg-page focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            <span className="sr-only">Dark mode</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-[18px] w-[18px]">
+              {theme === 'dark' ? (
+                <>
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+                </>
+              ) : (
+                <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+              )}
+            </svg>
+          </button>
           <div
-            className="ml-auto grid h-10 w-10 place-items-center rounded-full bg-brand font-bold text-white"
+            className="grid h-10 w-10 place-items-center rounded-full bg-brand font-bold text-white"
             aria-hidden="true"
           >
             {user.email[0].toUpperCase()}
           </div>
         </header>
         <main className="flex-1 p-4 md:p-6">{children}</main>
-        <footer className="px-6 pb-6 text-[13px] text-muted">
-          © 2026 AccessFlow
-        </footer>
+        <footer data-app-footer className="px-6 pb-6 text-[13px] text-muted">© 2026 AccessFlow</footer>
       </div>
     </div>
   );

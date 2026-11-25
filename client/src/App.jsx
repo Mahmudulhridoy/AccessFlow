@@ -1,20 +1,22 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import { useAuth } from "./context/AuthContext";
-import { homeFor } from "./utils/home";
-import Login from "./components/Login";
-import Register from "./components/Register";
-import ForgotPassword from "./components/ForgotPassword";
-import ResetPassword from "./components/ResetPassword";
-import Dashboard from "./components/Dashboard";
-import ProjectForm from "./components/ProjectForm";
-import ProjectDetail from "./components/ProjectDetail";
-import AdminScans from "./components/AdminScans";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import { homeFor } from './utils/home';
+import Login from './components/Login';
+import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import Dashboard from './components/Dashboard';
+import ProjectForm from './components/ProjectForm';
+import ProjectDetail from './components/ProjectDetail';
+import ComparePage from './components/ComparePage';
+import AdminScans from './components/AdminScans';
+import AdminMlEvaluation from './components/AdminMlEvaluation';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function Landing() {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return <Navigate to={user ? homeFor(user) : "/login"} replace />;
+  return <Navigate to={user ? homeFor(user) : '/login'} replace />;
 }
 
 const userOnly = (page) => <ProtectedRoute role="USER">{page}</ProtectedRoute>;
@@ -31,11 +33,20 @@ export default function App() {
       <Route path="/projects/new" element={userOnly(<ProjectForm />)} />
       <Route path="/projects/:id" element={userOnly(<ProjectDetail />)} />
       <Route path="/projects/:id/edit" element={userOnly(<ProjectForm />)} />
+      <Route path="/scans/:id/compare/:otherId" element={userOnly(<ComparePage />)} />
       <Route
         path="/admin/scans"
         element={
           <ProtectedRoute role="ADMIN">
             <AdminScans />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/ml"
+        element={
+          <ProtectedRoute role="ADMIN">
+            <AdminMlEvaluation />
           </ProtectedRoute>
         }
       />
