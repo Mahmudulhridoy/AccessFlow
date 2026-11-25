@@ -1,0 +1,56 @@
+{
+  "n_findings": 288,
+  "n_domains": 54,
+  "data_origins": [
+    "own_collected"
+  ],
+  "label_counts": {
+    "Low": 176,
+    "Medium": 107,
+    "High": 5
+  },
+  "split_label_counts": {
+    "train": {
+      "Low": 134,
+      "Medium": 79,
+      "High": 4
+    },
+    "test": {
+      "Low": 42,
+      "Medium": 28,
+      "High": 1
+    }
+  },
+  "merge_stats": {
+    "kept": 288
+  },
+  "duplicates": 0,
+  "duplicate_ids": 0,
+  "missing_required": {
+    "finding_id": 0,
+    "rule_id": 0,
+    "node_count": 0,
+    "registrable_domain": 0,
+    "final_label": 0,
+    "split": 0,
+    "data_origin": 0
+  },
+  "top_domain_share": 0.0556,
+  "self_consistency": {
+    "n": 0,
+    "weighted_kappa": null,
+    "note": "Too few re-labelled items to compute."
+  },
+  "readiness_gates": {
+    "real_annotated_data_only": true,
+    "test_has_min_examples_per_class": false,
+    "enough_domains": true,
+    "no_domain_dominates": false,
+    "self_consistency_ok": false,
+    "no_duplicate_findings": true,
+    "no_missing_required": true
+  },
+  "ready_for_meaningful_training": false,
+  "interpretation": "NOT ready: results from this data must be reported as exploratory, with the failed gates listed.",
+  "dataset_version": "showcase"
+}

@@ -1,0 +1,77 @@
+# AccessFlow dataset collection list - one public page per domain (no crawling).
+# Check each URL opens in your browser first; remove any that fail or redirect to login.
+# Start with the first 10 lines of URLs to test, then run the full list.
+
+# --- Bangladesh universities ---
+https://www.du.ac.bd/
+https://www.buet.ac.bd/
+https://www.northsouth.edu/
+https://www.bracu.ac.bd/
+https://www.iub.edu.bd/
+https://www.aiub.edu/
+https://www.ewubd.edu/
+https://daffodilvarsity.edu.bd/
+https://www.ulab.edu.bd/
+https://www.juniv.edu/
+https://www.ru.ac.bd/
+https://www.cu.ac.bd/
+https://www.sust.edu/
+https://www.kuet.ac.bd/
+https://www.ruet.ac.bd/
+https://www.cuet.ac.bd/
+https://www.bou.ac.bd/
+
+# --- Bangladesh news ---
+https://www.prothomalo.com/
+https://www.thedailystar.net/
+https://bdnews24.com/
+https://www.tbsnews.net/
+https://www.dhakatribune.com/
+https://www.kalerkantho.com/
+https://www.jugantor.com/
+https://www.banglatribune.com/
+https://www.samakal.com/
+
+# --- Bangladesh government ---
+https://bangladesh.gov.bd/
+https://dghs.gov.bd/
+https://nbr.gov.bd/
+https://www.bb.org.bd/
+https://btrc.gov.bd/
+https://a2i.gov.bd/
+https://ictd.gov.bd/
+
+# --- Bangladesh shops, banks, telecom ---
+https://www.daraz.com.bd/
+https://www.pickaboo.com/
+https://www.rokomari.com/
+https://chaldal.com/
+https://www.startech.com.bd/
+https://www.ryanscomputers.com/
+https://www.bracbank.com/
+https://www.dutchbanglabank.com/
+https://www.grameenphone.com/
+https://www.robi.com.bd/
+https://www.banglalink.com.bd/
+
+# --- International: education, news, government, general ---
+https://www.mit.edu/
+https://www.ox.ac.uk/
+https://www.bbc.com/
+https://www.theguardian.com/
+https://www.gov.uk/
+https://www.who.int/
+https://www.un.org/
+https://www.nasa.gov/
+https://www.wikipedia.org/
+https://wordpress.org/
+https://github.com/
+https://stackoverflow.com/
+https://www.craigslist.org/
+https://www.etsy.com/
+https://www.ebay.com/
+https://www.booking.com/
+https://www.airbnb.com/
+https://www.reddit.com/
+https://medium.com/
+https://www.nhs.uk/
