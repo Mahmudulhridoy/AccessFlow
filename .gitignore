@@ -2,4 +2,13 @@ node_modules
 .env
 dist
 .DS_Store
-README.md
+server/uploads
+
+# dataset collection (third-party data, never commit)
+ml-service/data/raw/
+ml-service/data/private/
+ml-service/data/*.csv
+ml-service/data/dataset_*.jsonl
+ml-service/artifacts/dev/
+__pycache__/
+.pytest_cache/
