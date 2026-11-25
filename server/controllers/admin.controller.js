@@ -1,5 +1,7 @@
 import * as Scan from '../models/scan.model.js';
 import * as MlEvaluation from '../models/mlEvaluation.model.js';
+import * as Feedback from '../models/feedback.model.js';
+import { summariseFeedback } from '../services/aiFeedback.js';
 import { presentEvaluation } from '../services/mlEvaluation.js';
 import { ACTIVE_STATUSES, FINISHED_STATUSES } from '../config/scanStatus.js';
 import { ERROR_CODES } from '../config/scanErrors.js';
@@ -42,4 +44,9 @@ export async function summary(req, res) {
 export async function mlEvaluations(req, res) {
   const rows = await MlEvaluation.list();
   res.json({ evaluations: rows.map(presentEvaluation) });
+}
+
+// Read-only summary of what users thought of the AI explanations. Ratings are opinions, not ground truth.
+export async function aiFeedback(req, res) {
+  res.json({ summary: summariseFeedback(await Feedback.listForAdmin()) });
 }

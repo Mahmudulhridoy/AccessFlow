@@ -9,6 +9,7 @@ router.use(requireAuth, requireRole('ADMIN'));
 
 router.get('/scans/summary', asyncHandler(admin.summary));
 router.get('/scans', asyncHandler(admin.listScans));
+router.get('/ai-feedback', asyncHandler(admin.aiFeedback));
 router.get('/ml/evaluations', asyncHandler(admin.mlEvaluations));
 
 export default router;
