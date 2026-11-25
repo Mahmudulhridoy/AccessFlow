@@ -1,9 +1,14 @@
-import PQueue from "p-queue";
-import { chromium } from "playwright";
-import env from "../config/env.js";
-import { ScanError, friendlyMessage } from "../config/scanErrors.js";
-import * as Scan from "../models/scan.model.js";
-import { assertSafeUrl, assertPublicHost } from "./ssrf.js";
+import crypto from 'crypto';
+import path from 'path';
+import PQueue from 'p-queue';
+import { chromium } from 'playwright';
+import env from '../config/env.js';
+import { ScanError, friendlyMessage } from '../config/scanErrors.js';
+import * as Scan from '../models/scan.model.js';
+import * as Finding from '../models/finding.model.js';
+import { runAxe } from './axeRunner.js';
+import { assertSafeUrl, assertPublicHost } from './ssrf.js';
+import { SCREENSHOT_DIR } from '../config/paths.js';
 
 const NAVIGATION_LIMIT = 30 * 1000;
 const TOTAL_LIMIT = 120 * 1000;
@@ -15,7 +20,7 @@ let browser = null;
 async function getBrowser() {
   if (!browser || !browser.isConnected()) {
     browser = await chromium.launch({
-      args: env.isProd ? ["--no-sandbox", "--disable-dev-shm-usage"] : [],
+      args: env.isProd ? ['--no-sandbox', '--disable-dev-shm-usage'] : [],
     });
   }
   return browser;
@@ -23,15 +28,15 @@ async function getBrowser() {
 
 function toErrorCode(err, { blocked, timedOut }) {
   if (err instanceof ScanError) return err.code;
-  if (blocked) return "SSRF_BLOCKED";
-  if (timedOut || err.name === "TimeoutError") return "TIMEOUT";
+  if (blocked) return 'SSRF_BLOCKED';
+  if (timedOut || err.name === 'TimeoutError') return 'TIMEOUT';
 
-  const message = err.message || "";
-  if (message.includes("ERR_NAME_NOT_RESOLVED")) return "DNS_FAILED";
-  if (message.includes("Download is starting")) return "NON_HTML";
-  if (/crash/i.test(message)) return "RENDER_CRASH";
-  if (message.includes("net::ERR_")) return "HTTP_ERROR";
-  return "INTERNAL";
+  const message = err.message || '';
+  if (message.includes('ERR_NAME_NOT_RESOLVED')) return 'DNS_FAILED';
+  if (message.includes('Download is starting')) return 'NON_HTML';
+  if (/crash/i.test(message)) return 'RENDER_CRASH';
+  if (message.includes('net::ERR_')) return 'HTTP_ERROR';
+  return 'INTERNAL';
 }
 
 async function runScan(scanId) {
@@ -55,29 +60,23 @@ async function runScan(scanId) {
   }, TOTAL_LIMIT);
 
   try {
-    await Scan.setStatus(scanId, "VALIDATING");
+    await Scan.setStatus(scanId, 'VALIDATING');
     await assertSafeUrl(scan.scannedUrl);
-    lap("validating");
+    lap('validating');
 
-    await Scan.setStatus(scanId, "RENDERING");
+    await Scan.setStatus(scanId, 'RENDERING');
     context = await (await getBrowser()).newContext({ acceptDownloads: false });
 
     const checked = new Map();
     const isAllowed = (host) => {
       if (!checked.has(host)) {
-        checked.set(
-          host,
-          assertPublicHost(host).then(
-            () => true,
-            () => false,
-          ),
-        );
+        checked.set(host, assertPublicHost(host).then(() => true, () => false));
       }
       return checked.get(host);
     };
 
     // Every request the browser makes (redirects, iframes, images, scripts) goes through here.
-    await context.route("**/*", async (route) => {
+    await context.route('**/*', async (route) => {
       const request = route.request();
 
       let target;
@@ -87,16 +86,12 @@ async function runScan(scanId) {
         return route.abort();
       }
 
-      if (target.protocol === "data:" || target.protocol === "blob:")
-        return route.continue();
-      if (target.protocol !== "http:" && target.protocol !== "https:")
-        return route.abort();
+      if (target.protocol === 'data:' || target.protocol === 'blob:') return route.continue();
+      if (target.protocol !== 'http:' && target.protocol !== 'https:') return route.abort();
 
-      const portOk =
-        !target.port || target.port === "80" || target.port === "443";
+      const portOk = !target.port || target.port === '80' || target.port === '443';
       if (!portOk || !(await isAllowed(target.hostname))) {
-        if (request.isNavigationRequest() && !request.frame().parentFrame())
-          blocked = true;
+        if (request.isNavigationRequest() && !request.frame().parentFrame()) blocked = true;
         return route.abort();
       }
       return route.continue();
@@ -104,32 +99,76 @@ async function runScan(scanId) {
 
     const page = await context.newPage();
     const response = await page.goto(scan.scannedUrl, {
-      waitUntil: "load",
+      waitUntil: 'load',
       timeout: NAVIGATION_LIMIT,
     });
     await page.waitForTimeout(SETTLE_DELAY);
 
-    if (!response) throw new ScanError("HTTP_ERROR");
+    if (!response) throw new ScanError('HTTP_ERROR');
     const status = response.status();
-    if (status === 403 || status === 429) throw new ScanError("TARGET_BLOCKED");
-    if (status >= 400) throw new ScanError("HTTP_ERROR");
+    if (status === 403 || status === 429) throw new ScanError('TARGET_BLOCKED');
+    if (status >= 400) throw new ScanError('HTTP_ERROR');
 
-    const type = response.headers()["content-type"] || "";
-    if (!/text\/html|application\/xhtml\+xml/i.test(type))
-      throw new ScanError("NON_HTML");
-    lap("rendering");
+    const type = response.headers()['content-type'] || '';
+    if (!/text\/html|application\/xhtml\+xml/i.test(type)) throw new ScanError('NON_HTML');
+    lap('rendering');
 
-    // Module 2 plugs in here: axe-core analysis, ML priority, LLM explanations.
+    const result = await page.evaluate(() => ({
+      title: document.title,
+      language: document.documentElement.lang || null,
+      description: document.querySelector('meta[name="description"]')?.content || null,
+      headings: [...document.querySelectorAll('h1,h2,h3,h4,h5,h6')]
+        .slice(0, 100)
+        .map((h) => ({ level: h.tagName, text: h.innerText.trim().slice(0, 150) })),
+      counts: {
+        links: document.querySelectorAll('a[href]').length,
+        images: document.querySelectorAll('img').length,
+        buttons: document.querySelectorAll('button').length,
+        forms: document.querySelectorAll('form').length,
+        inputs: document.querySelectorAll('input,select,textarea').length,
+      },
+    }));
+    result.httpStatus = status;
 
+    // Random suffix: screenshots are served without a login (an <img> tag cannot send a token), so the name must be unguessable.
+    const screenshotFile = `scan-${scanId}-${crypto.randomBytes(12).toString('hex')}.jpg`;
+    await page.screenshot({
+      path: path.join(SCREENSHOT_DIR, screenshotFile),
+      fullPage: true,
+      type: 'jpeg',
+      quality: 60,
+    });
+    lap('capturing');
+
+    await Scan.setStatus(scanId, 'ANALYZING');
+    let analysis;
+    try {
+      analysis = await runAxe(page);
+    } catch (axeErr) {
+      console.error('axe-core failed', axeErr);
+      throw new ScanError('AXE_FAILED');
+    }
+    result.axe = { ...analysis.stats, version: analysis.axeVersion, rulesetId: analysis.rulesetId };
+    const saved = await Finding.saveForScan(scanId, analysis.findings);
+    lap('analyzing');
+
+    const allWarnings = [...analysis.warnings];
+
+    const warnings = allWarnings.length ? allWarnings : null;
     await Scan.finish(scanId, {
-      status: "COMPLETED",
+      status: warnings ? 'COMPLETED_WITH_WARNINGS' : 'COMPLETED',
+      axeVersion: analysis.axeVersion,
+      rulesetId: analysis.rulesetId,
+      warnings,
       finalUrl: page.url(),
+      result,
+      screenshotFile,
       stageDurations: durations,
     });
   } catch (err) {
     const code = toErrorCode(err, { blocked, timedOut });
     await Scan.finish(scanId, {
-      status: "FAILED",
+      status: 'FAILED',
       errorCode: code,
       errorMessage: friendlyMessage(code),
       stageDurations: durations,
@@ -141,7 +180,5 @@ async function runScan(scanId) {
 }
 
 export function enqueueScan(scanId) {
-  queue
-    .add(() => runScan(scanId))
-    .catch((err) => console.error("Scan job failed", err));
+  queue.add(() => runScan(scanId)).catch((err) => console.error('Scan job failed', err));
 }
