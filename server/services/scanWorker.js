@@ -8,6 +8,7 @@ import * as Scan from '../models/scan.model.js';
 import * as Finding from '../models/finding.model.js';
 import { runAxe } from './axeRunner.js';
 import { runClassification } from './classificationStep.js';
+import { runExplanation } from './explanationStep.js';
 import { assertSafeUrl, assertPublicHost } from './ssrf.js';
 import { SCREENSHOT_DIR } from '../config/paths.js';
 
@@ -158,6 +159,10 @@ async function runScan(scanId) {
       await Scan.setStatus(scanId, 'CLASSIFYING');
       allWarnings.push(...(await runClassification(saved, analysis.findings)));
       lap('classifying');
+
+      await Scan.setStatus(scanId, 'EXPLAINING');
+      allWarnings.push(...(await runExplanation(saved, analysis.findings)));
+      lap('explaining');
     }
 
     const warnings = allWarnings.length ? allWarnings : null;
