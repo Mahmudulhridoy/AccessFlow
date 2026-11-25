@@ -33,6 +33,7 @@ model User {
   projects      Project[]
   refreshTokens RefreshToken[]
   passwordResets PasswordReset[]
+  explanationFeedback ExplanationFeedback[]
 }
 
 model RefreshToken {
@@ -216,6 +217,31 @@ model AiExplanation {
   createdAt   DateTime          @default(now())
 
   finding     Finding           @relation(fields: [findingId], references: [id], onDelete: Cascade)
+  feedback    ExplanationFeedback[]
+}
+
+enum FeedbackRating {
+  HELPFUL
+  NOT_HELPFUL
+}
+
+// A user's opinion of one explanation / fix suggestion. One row per user per explanation (re-rating updates it).
+// This is a subjective quality signal for the AI text, not ground truth.
+model ExplanationFeedback {
+  id            Int            @id @default(autoincrement())
+  explanationId Int
+  userId        Int
+  rating        FeedbackRating
+  reason        String?        @db.VarChar(30)
+  comment       String?        @db.VarChar(500)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  explanation   AiExplanation  @relation(fields: [explanationId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([explanationId, userId])
+  @@index([rating])
 }
 
 // Imported from model_metadata.json by a script; the Admin page only reads these rows.
