@@ -1,6 +1,6 @@
-import env from "./config/env.js";
-import app from "./app.js";
-import * as Scan from "./models/scan.model.js";
+import env from './config/env.js';
+import app from './app.js';
+import * as Scan from './models/scan.model.js';
 
 const recovered = await Scan.markStaleFailed();
 if (recovered.count > 0) {

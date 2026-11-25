@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import api, { setAccessToken } from "../api/axios";
+import { createContext, useContext, useEffect, useState } from 'react';
+import api, { setAccessToken } from '../api/axios';
 
 const AuthContext = createContext(null);
 
@@ -9,10 +9,7 @@ export const useAuth = () => useContext(AuthContext);
 // so the request must only be sent once per page load.
 let restoring = null;
 const restoreSession = () => {
-  restoring ??= api
-    .post("/auth/refresh")
-    .then((r) => r.data)
-    .catch(() => null);
+  restoring ??= api.post('/auth/refresh').then((r) => r.data).catch(() => null);
   return restoring;
 };
 
@@ -30,8 +27,8 @@ export function AuthProvider({ children }) {
     });
 
     const onExpired = () => setUser(null);
-    window.addEventListener("auth:expired", onExpired);
-    return () => window.removeEventListener("auth:expired", onExpired);
+    window.addEventListener('auth:expired', onExpired);
+    return () => window.removeEventListener('auth:expired', onExpired);
   }, []);
 
   const signIn = (data) => {
@@ -40,20 +37,20 @@ export function AuthProvider({ children }) {
   };
 
   const login = async (email, password) => {
-    const { data } = await api.post("/auth/login", { email, password });
+    const { data } = await api.post('/auth/login', { email, password });
     signIn(data);
     return data.user;
   };
 
   const register = async (email, password) => {
-    const { data } = await api.post("/auth/register", { email, password });
+    const { data } = await api.post('/auth/register', { email, password });
     signIn(data);
     return data.user;
   };
 
   const logout = async () => {
     try {
-      await api.post("/auth/logout");
+      await api.post('/auth/logout');
     } finally {
       setAccessToken(null);
       setUser(null);
