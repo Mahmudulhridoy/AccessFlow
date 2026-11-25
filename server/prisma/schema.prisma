@@ -117,6 +117,11 @@ enum PrioritySource {
   FALLBACK_AXE_IMPACT
 }
 
+enum DatasetOrigin {
+  REAL_ANNOTATED
+  SYNTHETIC_FIXTURE
+}
+
 // One axe-core rule that failed on one scanned page (nodes are aggregated below).
 model Finding {
   id          Int       @id @default(autoincrement())
@@ -192,3 +197,25 @@ model MlPrediction {
   @@index([priority])
 }
 
+// Imported from model_metadata.json by a script; the Admin page only reads these rows.
+model MlModelEvaluation {
+  id              Int           @id @default(autoincrement())
+  modelName       String        @db.VarChar(80)
+  modelVersion    String        @db.VarChar(40)
+  datasetVersion  String        @db.VarChar(40)
+  datasetOrigin   DatasetOrigin
+  datasetSize     Int
+  classCounts     Json
+  labels          Json          // ordered class labels
+  precisionMacro  Float
+  recallMacro     Float
+  f1Macro         Float
+  perClass        Json          // precision/recall/f1/support per label
+  confusionMatrix Json
+  baselines       Json          // same metrics for each baseline classifier
+  trainingConfig  Json
+  evaluatedAt     DateTime
+  createdAt       DateTime      @default(now())
+
+  @@unique([modelName, modelVersion, datasetVersion])
+}
